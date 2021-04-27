@@ -1,5 +1,5 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 1
+//#define BUFFER_SIZE 4
 
 //utils
 
@@ -170,14 +170,14 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 	}
 	if (rd_cnt == 0)
 		{
-			if (**line == 0)
+			if(*save != 0)
+				*line = save;
+			else if (**line == 0)
 			{
 				free(*line);
 				*line = NULL;
 				*line = ft_strdup("");
 			}
-			else if(*save != 0)
-				*line = save;
 		}
 	free(buf);
 	return (save);
