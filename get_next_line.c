@@ -174,7 +174,7 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 		save = split_save_after(save);
 		into_line(line, tmp);
 	}
-	if (rd_cnt == 0 && save)
+	if (rd_cnt == 0 && *save != 0)
 		*line = save;
 	free(buf);
 	return (save);
