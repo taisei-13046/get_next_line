@@ -136,16 +136,33 @@ char	*split_save(char *save, int *flag)
 	return (tmp);
 }
 
-void	into_line(char **line, char *tmp)
+int	read_and_join(char *save, char **line, int *flag, int fd)
 {
-	if ((*line) != 0)
-		*line = ft_strjoin(*line, tmp);
-	else
+	int 	rd_cnt;
+	char	*buf;
+	char	*tmp;
+
+	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	while (*flag == 0 && (rd_cnt = read(fd, buf, BUFFER_SIZE)) > 0)
 	{
-		free(*line);
-		*line = NULL;
-		*line = tmp;
+		if (rd_cnt == 0)
+			break ;
+		buf[rd_cnt] = 0;
+		if (ft_strchr(buf, '\n'))
+			*flag = 1;
+		save = ft_strjoin(save, buf);
+		tmp = split_save(save, flag);
+		save = split_save_after(save);
+		if ((*line) != 0)
+			*line = ft_strjoin(*line, tmp);
+		else
+		{
+			free(*line);
+			*line = NULL;
+			*line = tmp;
+		}
 	}
+	return (rd_cnt);
 }
 
 char	*read_get_next_line(char *save, int fd, int *flag, char **line)
@@ -154,25 +171,11 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 	char	*buf;
 	ssize_t		rd_cnt;
 
-	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	while (*flag == 0 && (rd_cnt = read(fd, buf, BUFFER_SIZE)) > 0)
-	{
-		if (rd_cnt == 0)
+	rd_cnt = read_and_join(save, line, flag, fd);
+	if (rd_cnt == 0)
 		{
 			*flag = 0;
-			break ;
-		}
-		buf[rd_cnt] = 0;
-		if (ft_strchr(buf, '\n'))
-			*flag = 1;
-		save = ft_strjoin(save, buf);
-		tmp = split_save(save, flag);
-		save = split_save_after(save);
-		into_line(line, tmp);
-	}
-	if (rd_cnt == 0 && **line == 0)
-		{
-			if (save != NULL)
+			if (save != NULL && **line == 0)
 			{
 				*line = save;
 				save = NULL;
@@ -217,32 +220,32 @@ int	get_next_line(int fd, char **line)
 	return (flag);
 }
 
+/*
+#include <sys/types.h>
+#include <stdio.h>
 
-//#include <sys/types.h>
-//#include <stdio.h>
+int    main(void)
+{
+    int        d = 1;
+    char    *line;
+    int        fd;
+    int        i = 1;
 
-//int    main(void)
-//{
-//    int        d = 1;
-//    char    *line;
-//    int        fd;
-//    int        i = 1;
-
-//    fd = open("test.txt", O_RDONLY);
-//    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
-//    while (d == 1)
-//    {
-//        printf("---%dline---\n", i);
-//        d = get_next_line(fd, &line);
-//        printf("%s\t", line);
-//        free(line);
-//        printf("d : %d\n", d);
-//        i++;
-//    }
-//	//d = get_next_line(fd, &line);
-//	//printf("%s\t", line);
-//	//printf("d : %d\n", d);
-//    close(fd);
-//    system("leaks a.out");
-//    return (0);
-//}
+    fd = open("test.txt", O_RDONLY);
+    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
+    while (d == 1)
+    {
+        printf("---%dline---\n", i);
+        d = get_next_line(fd, &line);
+        printf("%s\t", line);
+        free(line);
+        printf("d : %d\n", d);
+        i++;
+    }
+	//d = get_next_line(fd, &line);
+	//printf("%s\t", line);
+	//printf("d : %d\n", d);
+    close(fd);
+    system("leaks a.out");
+    return (0);
+}*/
