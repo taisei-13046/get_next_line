@@ -1,5 +1,5 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 4
+//#define BUFFER_SIZE 100000
 
 //utils
 
@@ -113,6 +113,7 @@ char	*split_save_after(char *save)
 	while (save[len] != '\n' && save[len])
 		len++;
 	tmp = ft_substr(&save[len], 1, ft_strlen(save));
+	//free(save);
 	return (tmp);
 }
 
@@ -170,8 +171,11 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 	}
 	if (rd_cnt == 0)
 		{
-			if(*save != 0)
+			if (*save != 0)
+			{
 				*line = save;
+				save = NULL;
+			}
 			else if (**line == 0)
 			{
 				free(*line);
@@ -232,6 +236,9 @@ int	get_next_line(int fd, char **line)
 //        printf("d : %d\n", d);
 //        i++;
 //    }
+//	//d = get_next_line(fd, &line);
+//	printf("%s\t", line);
+//	printf("d : %d\n", d);
 //    close(fd);
 //    // system("leaks a.out");
 //    return (0);
