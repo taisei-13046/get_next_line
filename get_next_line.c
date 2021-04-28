@@ -198,6 +198,8 @@ int	get_next_line(int fd, char **line)
 		return (-1);
 	*line = malloc(1);
 	*line[0] = 0;
+	save = malloc(1);
+	save[0] = 0;
 	if (ft_strchr(save, '\n'))
 	{
 		tmp = split_save(save, &flag);
@@ -237,8 +239,8 @@ int	get_next_line(int fd, char **line)
 //        i++;
 //    }
 //	//d = get_next_line(fd, &line);
-//	printf("%s\t", line);
-//	printf("d : %d\n", d);
+//	//printf("%s\t", line);
+//	//printf("d : %d\n", d);
 //    close(fd);
 //    // system("leaks a.out");
 //    return (0);
