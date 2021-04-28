@@ -1,5 +1,6 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 100
+//#define BUFFER_SIZE 63
+#include <stdio.h>
 
 //utils
 
@@ -16,30 +17,23 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-static char	*sub_strcpy(char *str_a, char *src)
+char	*ft_strdup(const char *str)
 {
-	int	i;
+	char	*str_a;
+	char	*src;
+	size_t	i;
 
 	i = 0;
+	src = (char *)str;
+	str_a = (char *)malloc((sizeof(char) * ft_strlen(src) + 1));
+	if (!str_a)
+		return (NULL);
 	while (src[i])
 	{
 		str_a[i] = src[i];
 		i++;
 	}
 	str_a[i] = '\0';
-	return (str_a);
-}
-
-char	*ft_strdup(const char *str)
-{
-	char	*str_a;
-	char	*src;
-
-	src = (char *)str;
-	str_a = (char *)malloc((sizeof(char) * ft_strlen(src) + 1));
-	if (!str_a)
-		return (NULL);
-	str_a = sub_strcpy(str_a, src);
 	return (str_a);
 }
 
@@ -113,7 +107,8 @@ char	*split_save_after(char *save)
 	while (save[len] != '\n' && save[len])
 		len++;
 	tmp = ft_substr(&save[len], 1, ft_strlen(save));
-	//free(save);
+	free(save);
+	save = NULL;
 	return (tmp);
 }
 
@@ -135,18 +130,6 @@ char	*split_save(char *save, int *flag)
 	return (tmp);
 }
 
-void	into_line(char **line, char *tmp)
-{
-	if ((*line) != 0)
-		*line = ft_strjoin(*line, tmp);
-	else
-	{
-		free(*line);
-		*line = NULL;
-		*line = tmp;
-	}
-}
-
 char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 {
 	char	*tmp;
@@ -156,6 +139,7 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	while (*flag == 0 && (rd_cnt = read(fd, buf, BUFFER_SIZE)) > 0)
 	{
+		//printf("%s\n", buf);
 		if (rd_cnt == 0)
 		{
 			*flag = 0;
@@ -167,7 +151,14 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 		save = ft_strjoin(save, buf);
 		tmp = split_save(save, flag);
 		save = split_save_after(save);
-		into_line(line, tmp);
+		if ((*line) != 0)
+			*line = ft_strjoin(*line, tmp);
+		else
+		{
+			free(*line);
+			*line = NULL;
+			*line = tmp;
+		}
 	}
 	if (rd_cnt == 0 && **line == 0)
 		{
@@ -212,13 +203,15 @@ int	get_next_line(int fd, char **line)
 		*line = tmp;
 	}
 	if (flag == 0)
+	{
+		free(save);
 		save = NULL;
+	}
 	return (flag);
 }
 
 
 //#include <sys/types.h>
-//#include <stdio.h>
 
 //int    main(void)
 //{
@@ -238,10 +231,7 @@ int	get_next_line(int fd, char **line)
 //        printf("d : %d\n", d);
 //        i++;
 //    }
-//	//d = get_next_line(fd, &line);
-//	//printf("%s\t", line);
-//	//printf("d : %d\n", d);
 //    close(fd);
-//    // system("leaks a.out");
+//    system("leaks a.out");
 //    return (0);
 //}
