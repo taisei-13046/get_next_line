@@ -1,5 +1,5 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 1000000000
+//#define BUFFER_SIZE 100
 
 //utils
 
@@ -169,7 +169,7 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 		save = split_save_after(save);
 		into_line(line, tmp);
 	}
-	if (rd_cnt == 0 && !(*line))
+	if (rd_cnt == 0 && **line == 0)
 		{
 			if (save != NULL)
 			{
@@ -211,6 +211,8 @@ int	get_next_line(int fd, char **line)
 		*line = NULL;
 		*line = tmp;
 	}
+	if (flag == 0)
+		save = NULL;
 	return (flag);
 }
 
