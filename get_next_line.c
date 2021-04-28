@@ -171,7 +171,7 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 	}
 	if (rd_cnt == 0)
 		{
-			if (*save != 0)
+			if (save)
 			{
 				*line = save;
 				save = NULL;
@@ -198,8 +198,6 @@ int	get_next_line(int fd, char **line)
 		return (-1);
 	*line = malloc(1);
 	*line[0] = 0;
-	save = malloc(1);
-	save[0] = 0;
 	if (ft_strchr(save, '\n'))
 	{
 		tmp = split_save(save, &flag);
