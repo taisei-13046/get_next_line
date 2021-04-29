@@ -1,5 +1,6 @@
 #include "get_next_line.h"
 //#define BUFFER_SIZE 63
+#include <stdio.h>
 
 //utils
 
@@ -173,6 +174,7 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 			*line = ft_strjoin(*line, tmp);
 		else
 			*line = tmp;
+		free(tmp);
 	}
 	rd_zero(rd_cnt, save, line, flag);
 	free(buf);
@@ -200,7 +202,6 @@ int	get_next_line(int fd, char **line)
 	else
 	{
 		free(*line);
-		*line = NULL;
 		*line = tmp;
 	}
 	if (flag == 0)
