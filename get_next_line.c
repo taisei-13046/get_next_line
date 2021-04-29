@@ -109,6 +109,7 @@ char	*split_save_after(char *save)
 	tmp = ft_substr(&save[len], 1, ft_strlen(save));
 	tmp[ft_strlen(save) - len] = 0;
 	free(save);
+	//printf("save : %p\n", save);
 	return (tmp);
 }
 
@@ -141,16 +142,18 @@ void	rd_zero(ssize_t rd_cnt, char *save, char **line, int *flag)
 	{
 		if (save != NULL)
 		{
+			free(*line);
 			*line = save;
+			free(save);
 			save = NULL;
 		}
 		else if (**line == 0)
 		{
 			free(*line);
-			*line = NULL;
 			*line = ft_strdup("");
 		}
 	}
+	//freepoint?
 }
 
 char	*read_get_next_line(char *save, int fd, int *flag, char **line)
@@ -175,9 +178,12 @@ char	*read_get_next_line(char *save, int fd, int *flag, char **line)
 		else
 			*line = tmp;
 		free(tmp);
+		tmp = NULL;
 	}
 	rd_zero(rd_cnt, save, line, flag);
+	//printf("buf : %p\n", buf);
 	free(buf);
+	buf = NULL;
 	return (save);
 }
 
@@ -205,7 +211,7 @@ int	get_next_line(int fd, char **line)
 		*line = tmp;
 	}
 	if (flag == 0)
-		save = NULL;
+		free(save);
 	return (flag);
 }
 
