@@ -1,5 +1,5 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 1000
+//#define BUFFER_SIZE 100
 
 size_t	ft_strlen(const char *str)
 {
@@ -121,16 +121,17 @@ int	get_next_line(int fd, char **line)
 	ssize_t		rd_cnt;
 
 	//最初のrd_cntの初期化
-	if (save[fd] == NULL || !(*save[fd]))
-		rd_cnt = 1;
+	rd_cnt = 0;
 	//例外処理
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (-1);
 	//read
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	while (rd_cnt > 0)
+	while (rd_cnt >= 0)
 	{
 		rd_cnt = read(fd, buf, BUFFER_SIZE);
+		if (rd_cnt == 0)
+			break ;
 		buf[rd_cnt] = '\0';
 		//save+buf strjoin内でsaveはfree
 		save[fd] = ft_strjoin(save[fd], buf);
