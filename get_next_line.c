@@ -1,6 +1,5 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 1
-#include <stdio.h>
+//#define BUFFER_SIZE 1000
 
 size_t	ft_strlen(const char *str)
 {
@@ -12,20 +11,6 @@ size_t	ft_strlen(const char *str)
 	while (str[i])
 		i++;
 	return (i);
-}
-
-int	ft_strchr(char *save)
-{
-	int	i;
-
-	i = 0;
-	while (save[i])
-	{
-		if (save[i] == '\n')
-			return (i);
-		i++;
-	}
-	return (-1);
 }
 
 char	*ft_strdup(char *str)
@@ -44,6 +29,20 @@ char	*ft_strdup(char *str)
 	}
 	ans[i] = '\0';
 	return (ans);
+}
+
+int	ft_strchr(char *save)
+{
+	int	i;
+
+	i = 0;
+	while (save[i])
+	{
+		if (save[i] == '\n')
+			return (i);
+		i++;
+	}
+	return (-1);
 }
 
 char	*ft_strjoin(char *save, char *buf)
@@ -84,9 +83,11 @@ int	split_save(char **save, char **line)
 	size_t	save_len;
 	char	*tmp;
 
+	//saveの改行までを*lineに入れる
 	save_len = ft_strchr(*save);
 	(*save)[save_len] = '\0';
 	*line = ft_strdup(*save);
+	//saveの改行後を更新
 	tmp = ft_strdup(*save + save_len + 1);
 	free(*save);
 	*save = tmp;
@@ -98,13 +99,12 @@ int	split_all(char **save, char **line)
 	int		save_len;
 
 	save_len = ft_strchr(*save);
+	//saveに改行があるとき
 	if (save_len >= 0)
-	{
 		return (split_save(save, line));
-	}
+	//saveに改行がない時
 	else if (*save)
 	{
-		free(*line);
 		*line = *save;
 		*save = 0;
 		return (0);
@@ -120,25 +120,32 @@ int	get_next_line(int fd, char **line)
 	char		*buf;
 	ssize_t		rd_cnt;
 
-	if ((*save == NULL) || (*save = 0))
+	//最初のrd_cntの初期化
+	if (save[fd] == NULL || !(*save[fd]))
 		rd_cnt = 1;
-	if (fd < 0 || !(*line) || BUFFER_SIZE <= 0)
+	//例外処理
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (-1);
+	//read
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	while (rd_cnt > 0)
 	{
 		rd_cnt = read(fd, buf, BUFFER_SIZE);
 		buf[rd_cnt] = '\0';
+		//save+buf strjoin内でsaveはfree
 		save[fd] = ft_strjoin(save[fd], buf);
+		//saveに改行があったら
 		if (ft_strchr(save[fd]) >= 0)
 		{
 			free(buf);
+			//saveの改行までをlineにいれる
 			flag = split_save(&save[fd], line);
 			return (flag);
 		}
 	}
 	if (rd_cnt < 0)
 		return (-1);
+	//readし切った時
 	flag = split_all(&save[fd], line);
 	return (flag);
 }
