@@ -1,10 +1,8 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 63
+//#define BUFFER_SIZE 6
 #include <stdio.h>
 
 //utils
-
-
 size_t	ft_strlen(const char *str)
 {
 	size_t	i;
@@ -17,63 +15,90 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-char	*ft_strdup(const char *str)
+char	*ft_strdup(char *str)
 {
-	char	*str_a;
-	char	*src;
+	char	*ans;
+	int		i;
+
+	i = 0;
+	ans = (char *)malloc((sizeof(char) * ft_strlen(str) + 1));
+	if (!ans)
+		return (NULL);
+	while (str[i])
+	{
+		ans[i] = str[i];
+		i++;
+	}
+	ans[i] = '\0';
+	return (ans);
+}
+
+int	ft_strchr(char *save)
+{
 	int	i;
 
 	i = 0;
-	src = (char *)str;
-	str_a = (char *)malloc((sizeof(char) * ft_strlen(src) + 1));
-	if (!str_a)
-		return (NULL);
-	while (src[i])
+	while (save[i])
 	{
-		str_a[i] = src[i];
+		if (save[i] == '\n')
+			return (i);
 		i++;
 	}
-	str_a[i] = '\0';
-	return (str_a);
+	return (-1);
 }
 
-char	*ft_strchr(const char *str, int c)
+size_t	ft_strlcat(char *dest, char *src, unsigned int size)
 {
-	c = (char)c;
-	if (!str)
-		return (NULL);
-	while (*str != c)
+	unsigned int dcnt;
+	unsigned int scnt;
+
+	scnt = 0;
+	dcnt = ft_strlen(dest);
+	if (size < dcnt)
 	{
-		if (*str == '\0')
-			return (NULL);
-		str++;
+		while (src[scnt])
+			scnt++;
+		return (size + scnt);
 	}
-	return ((char *)str);
+	while ((src[scnt]) && (dcnt < size - 1) && (size > 0))
+		dest[dcnt++] = src[scnt++];
+	dest[dcnt] = '\0';
+	while (src[scnt++])
+		dcnt++;
+	return (dcnt);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *save, char *buf)
 {
-	char	*p;
+	char	*ans;
+	size_t	save_len;
+	size_t	buf_len;
 	int		i;
+	int		m;
 
-	p = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
-	if (!p)
-		return (NULL);
+	if (!save)
+		return (ft_strdup(buf));
+	else if (!buf)
+		return (ft_strdup(save));
+	save_len = ft_strlen(save);
+	buf_len = ft_strlen(buf);
+	ans = malloc(sizeof(char) * (save_len + buf_len + 1));
 	i = 0;
-	while (s1 != NULL && *s1)
+	while (i < save_len)
 	{
-		p[i] = *s1;
+		ans[i] = save[i];
 		i++;
-		s1++;
 	}
-	while (*s2)
+	free(save);
+	m = 0;
+	while (m < buf_len)
 	{
-		p[i] = *s2;
+		ans[i] = buf[m];
 		i++;
-		s2++;
+		m++;
 	}
-	p[i] = '\0';
-	return (p);
+	ans[i] = '\0';
+	return (ans);
 }
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
@@ -95,126 +120,83 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	return (p);
 }
 
-
 //get_next_line
 
-char	*split_save_after(char *save)
+int	split_save(char **save, char **line, int rd_cnt)
 {
-	size_t	len;
+	size_t	save_len;
 	char	*tmp;
 
-	len = 0;
-	while (save[len] != '\n' && save[len])
-		len++;
-	tmp = ft_substr(&save[len], 1, ft_strlen(save));
-	tmp[ft_strlen(save) - len] = 0;
-	free(save);
-	//printf("save : %p\n", save);
-	return (tmp);
+	//saveの改行までを*lineに入れる
+	save_len = ft_strchr(*save);
+	(*save)[save_len] = '\0';
+	*line = ft_strdup(*save);
+	//saveの改行後を更新
+	tmp = ft_strdup(*save + save_len + 1);
+	free(*save);
+	*save = tmp;
+	return (1);
 }
 
-char	*split_save(char *save, int *flag)
+int	split_all(char **save, char **line, int rd_cnt)
 {
+	int		save_len;
 	char	*tmp;
-	size_t	len;
 
-	len = 0;
-	tmp = (char *)malloc(sizeof(char *) * (ft_strlen(save) + 1));
-	while (save[len] != '\n' && save[len])
+	save_len = ft_strchr(*save);
+	//saveに改行があるとき
+	if (save_len >= 0)
 	{
-		tmp[len] = save[len];
-		len++;
+		return (split_save(save, line, save_len));
 	}
-	tmp[len] = 0;
-	if (ft_strchr(&save[len], '\n') || !save)
-		(*flag) = 1;
-	return (tmp);
-}
-
-void	rd_zero(ssize_t rd_cnt, char *save, char **line, int *flag)
-{
-	if (rd_cnt < 0)
+	//saveに改行がない時
+	else if (*save)
 	{
-		*flag = -1;
-		return ;
+		free(*line);
+		*line = *save;
+		*save = 0;
+		return (0);
 	}
-	if (rd_cnt == 0 && **line == 0)
-	{
-		if (save != NULL)
-		{
-			free(*line);
-			*line = save;
-			free(save);
-			save = NULL;
-		}
-		else if (**line == 0)
-		{
-			free(*line);
-			*line = ft_strdup("");
-		}
-	}
-	//freepoint?
-}
-
-char	*read_get_next_line(char *save, int fd, int *flag, char **line)
-{
-	char	*tmp;
-	char	*buf;
-	ssize_t		rd_cnt;
-
-	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	while (*flag == 0 && (rd_cnt = read(fd, buf, BUFFER_SIZE)) > 0)
-	{
-		if (rd_cnt == 0)
-			*flag = 0;
-		buf[rd_cnt] = 0;
-		if (ft_strchr(buf, '\n'))
-			*flag = 1;
-		save = ft_strjoin(save, buf);
-		tmp = split_save(save, flag);
-		save = split_save_after(save);
-		if ((*line) != 0)
-			*line = ft_strjoin(*line, tmp);
-		else
-			*line = tmp;
-		free(tmp);
-		tmp = NULL;
-	}
-	rd_zero(rd_cnt, save, line, flag);
-	//printf("buf : %p\n", buf);
-	free(buf);
-	buf = NULL;
-	return (save);
+	*line = ft_strdup("");
+	return (0);
 }
 
 int	get_next_line(int fd, char **line)
 {
 	int			flag;
-	static char	*save;
-	char		*tmp;
+	static char	*save[MAX_FD];
+	char		*buf;
+	ssize_t		rd_cnt;
 
-	flag = 0;
-	if (fd < 0 || !line || BUFFER_SIZE < 0)
+	//最初のrd_cntの初期化
+	if ((*save == NULL) || (*save = 0))
+		rd_cnt = 1;
+	//例外処理
+	if (fd < 0 || !(*line) || BUFFER_SIZE <= 0)
 		return (-1);
-	*line = malloc(1);
-	*line[0] = 0;
-	if (ft_strchr(save, '\n'))
+	//read
+	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	while (rd_cnt > 0)
 	{
-		tmp = split_save(save, &flag);
-		save = split_save_after(save);
+		rd_cnt = read(fd, buf, BUFFER_SIZE);
+		buf[rd_cnt] = '\0';
+		//save+buf strjoin内でsaveはfree
+		save[fd] = ft_strjoin(save[fd], buf);
+		//saveに改行があったら
+		if (ft_strchr(save[fd]) >= 0)
+		{
+			free(buf);
+			//saveの改行までをlineにいれる
+			flag = split_save(&save[fd], line, rd_cnt);
+			return (flag);
+		}
 	}
-	if (!ft_strchr(save, '\n') && flag == 0)
-		save = read_get_next_line(save, fd, &flag, line);
-	else
-	{
-		free(*line);
-		*line = tmp;
-	}
-	if (flag == 0)
-		free(save);
+	if (rd_cnt < 0)
+		return (-1);
+	//readし切った時
+	flag = split_all(&save[fd], line, rd_cnt);
 	return (flag);
 }
-
 
 //#include <sys/types.h>
 //#include <stdio.h>
