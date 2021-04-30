@@ -1,8 +1,7 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 6
+//#define BUFFER_SIZE 1
 #include <stdio.h>
 
-//utils
 size_t	ft_strlen(const char *str)
 {
 	size_t	i;
@@ -13,6 +12,20 @@ size_t	ft_strlen(const char *str)
 	while (str[i])
 		i++;
 	return (i);
+}
+
+int	ft_strchr(char *save)
+{
+	int	i;
+
+	i = 0;
+	while (save[i])
+	{
+		if (save[i] == '\n')
+			return (i);
+		i++;
+	}
+	return (-1);
 }
 
 char	*ft_strdup(char *str)
@@ -31,41 +44,6 @@ char	*ft_strdup(char *str)
 	}
 	ans[i] = '\0';
 	return (ans);
-}
-
-int	ft_strchr(char *save)
-{
-	int	i;
-
-	i = 0;
-	while (save[i])
-	{
-		if (save[i] == '\n')
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-size_t	ft_strlcat(char *dest, char *src, unsigned int size)
-{
-	unsigned int dcnt;
-	unsigned int scnt;
-
-	scnt = 0;
-	dcnt = ft_strlen(dest);
-	if (size < dcnt)
-	{
-		while (src[scnt])
-			scnt++;
-		return (size + scnt);
-	}
-	while ((src[scnt]) && (dcnt < size - 1) && (size > 0))
-		dest[dcnt++] = src[scnt++];
-	dest[dcnt] = '\0';
-	while (src[scnt++])
-		dcnt++;
-	return (dcnt);
 }
 
 char	*ft_strjoin(char *save, char *buf)
@@ -101,37 +79,14 @@ char	*ft_strjoin(char *save, char *buf)
 	return (ans);
 }
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
-{
-	char *p;
-	int i;
-
-	i = 0;
-	s = (char *)s;
-	if (!(p = malloc(sizeof(char *) * len + 1)))
-		return (NULL);
-	while(len-- > 0)
-	{
-		p[i] = s[start];
-		i++;
-		start++;
-	}
-	p[i] = 0;
-	return (p);
-}
-
-//get_next_line
-
 int	split_save(char **save, char **line)
 {
 	size_t	save_len;
 	char	*tmp;
 
-	//saveの改行までを*lineに入れる
 	save_len = ft_strchr(*save);
 	(*save)[save_len] = '\0';
 	*line = ft_strdup(*save);
-	//saveの改行後を更新
 	tmp = ft_strdup(*save + save_len + 1);
 	free(*save);
 	*save = tmp;
@@ -143,12 +98,10 @@ int	split_all(char **save, char **line)
 	int		save_len;
 
 	save_len = ft_strchr(*save);
-	//saveに改行があるとき
 	if (save_len >= 0)
 	{
 		return (split_save(save, line));
 	}
-	//saveに改行がない時
 	else if (*save)
 	{
 		free(*line);
@@ -167,61 +120,52 @@ int	get_next_line(int fd, char **line)
 	char		*buf;
 	ssize_t		rd_cnt;
 
-	//最初のrd_cntの初期化
 	if ((*save == NULL) || (*save = 0))
 		rd_cnt = 1;
-	//例外処理
 	if (fd < 0 || !(*line) || BUFFER_SIZE <= 0)
 		return (-1);
-	//read
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	while (rd_cnt > 0)
 	{
 		rd_cnt = read(fd, buf, BUFFER_SIZE);
 		buf[rd_cnt] = '\0';
-		//save+buf strjoin内でsaveはfree
 		save[fd] = ft_strjoin(save[fd], buf);
-		//saveに改行があったら
 		if (ft_strchr(save[fd]) >= 0)
 		{
 			free(buf);
-			//saveの改行までをlineにいれる
 			flag = split_save(&save[fd], line);
 			return (flag);
 		}
 	}
 	if (rd_cnt < 0)
 		return (-1);
-	//readし切った時
 	flag = split_all(&save[fd], line);
 	return (flag);
 }
-/*
-#include <sys/types.h>
-#include <stdio.h>
 
-int    main(void)
-{
-    int        d = 1;
-    char    *line;
-    int        fd;
-    int        i = 1;
-
-    fd = open("test.txt", O_RDONLY);
-    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
-    while (d == 1)
-    {
-        printf("---%dline---\n", i);
-        d = get_next_line(fd, &line);
-        printf("%s\t", line);
-        free(line);
-        printf("d : %d\n", d);
-        i++;
-    }
-	//d = get_next_line(fd, &line);
-	//printf("%s\t", line);
-	//printf("d : %d\n", d);
-    close(fd);
-    system("leaks a.out");
-    return (0);
-}*/
+//#include <sys/types.h>
+//#include <stdio.h>
+//int    main(void)
+//{
+//    int        d = 1;
+//    char    *line;
+//    int        fd;
+//    int        i = 1;
+//    fd = open("test.txt", O_RDONLY);
+//    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
+//    while (d == 1)
+//    {
+//        printf("---%dline---\n", i);
+//        d = get_next_line(fd, &line);
+//        printf("%s\t", line);
+//        free(line);
+//        printf("d : %d\n", d);
+//        i++;
+//    }
+//	//d = get_next_line(fd, &line);
+//	//printf("%s\t", line);
+//	//printf("d : %d\n", d);
+//    close(fd);
+//    system("leaks a.out");
+//    return (0);
+//}
