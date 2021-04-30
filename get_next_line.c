@@ -141,7 +141,6 @@ int	split_save(char **save, char **line)
 int	split_all(char **save, char **line)
 {
 	int		save_len;
-	char	*tmp;
 
 	save_len = ft_strchr(*save);
 	//saveに改行があるとき
@@ -197,32 +196,32 @@ int	get_next_line(int fd, char **line)
 	flag = split_all(&save[fd], line);
 	return (flag);
 }
+/*
+#include <sys/types.h>
+#include <stdio.h>
 
-//#include <sys/types.h>
-//#include <stdio.h>
+int    main(void)
+{
+    int        d = 1;
+    char    *line;
+    int        fd;
+    int        i = 1;
 
-//int    main(void)
-//{
-//    int        d = 1;
-//    char    *line;
-//    int        fd;
-//    int        i = 1;
-
-//    fd = open("test.txt", O_RDONLY);
-//    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
-//    while (d == 1)
-//    {
-//        printf("---%dline---\n", i);
-//        d = get_next_line(fd, &line);
-//        printf("%s\t", line);
-//        free(line);
-//        printf("d : %d\n", d);
-//        i++;
-//    }
-//	//d = get_next_line(fd, &line);
-//	//printf("%s\t", line);
-//	//printf("d : %d\n", d);
-//    close(fd);
-//    system("leaks a.out");
-//    return (0);
-//}
+    fd = open("test.txt", O_RDONLY);
+    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
+    while (d == 1)
+    {
+        printf("---%dline---\n", i);
+        d = get_next_line(fd, &line);
+        printf("%s\t", line);
+        free(line);
+        printf("d : %d\n", d);
+        i++;
+    }
+	//d = get_next_line(fd, &line);
+	//printf("%s\t", line);
+	//printf("d : %d\n", d);
+    close(fd);
+    system("leaks a.out");
+    return (0);
+}*/
