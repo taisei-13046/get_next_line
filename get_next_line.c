@@ -73,8 +73,8 @@ char	*ft_strjoin(char *save, char *buf)
 	char	*ans;
 	size_t	save_len;
 	size_t	buf_len;
-	int		i;
-	int		m;
+	size_t	i;
+	size_t	m;
 
 	if (!save)
 		return (ft_strdup(buf));
@@ -122,7 +122,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 
 //get_next_line
 
-int	split_save(char **save, char **line, int rd_cnt)
+int	split_save(char **save, char **line)
 {
 	size_t	save_len;
 	char	*tmp;
@@ -138,7 +138,7 @@ int	split_save(char **save, char **line, int rd_cnt)
 	return (1);
 }
 
-int	split_all(char **save, char **line, int rd_cnt)
+int	split_all(char **save, char **line)
 {
 	int		save_len;
 	char	*tmp;
@@ -147,7 +147,7 @@ int	split_all(char **save, char **line, int rd_cnt)
 	//saveに改行があるとき
 	if (save_len >= 0)
 	{
-		return (split_save(save, line, save_len));
+		return (split_save(save, line));
 	}
 	//saveに改行がない時
 	else if (*save)
@@ -164,7 +164,7 @@ int	split_all(char **save, char **line, int rd_cnt)
 int	get_next_line(int fd, char **line)
 {
 	int			flag;
-	static char	*save[MAX_FD];
+	static char	*save[0];
 	char		*buf;
 	ssize_t		rd_cnt;
 
@@ -187,14 +187,14 @@ int	get_next_line(int fd, char **line)
 		{
 			free(buf);
 			//saveの改行までをlineにいれる
-			flag = split_save(&save[fd], line, rd_cnt);
+			flag = split_save(&save[fd], line);
 			return (flag);
 		}
 	}
 	if (rd_cnt < 0)
 		return (-1);
 	//readし切った時
-	flag = split_all(&save[fd], line, rd_cnt);
+	flag = split_all(&save[fd], line);
 	return (flag);
 }
 
