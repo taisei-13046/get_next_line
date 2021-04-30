@@ -74,8 +74,6 @@ char	*ft_strjoin(char *save, char *buf)
 {
 	size_t	save_len;
 	size_t	buf_len;
-	size_t	i;
-	size_t	m;
 
 	if (!save)
 		return (ft_strdup(buf));
@@ -91,11 +89,9 @@ int	split_save(char **save, char **line)
 	size_t	save_len;
 	char	*tmp;
 
-	//saveの改行までを*lineに入れる
 	save_len = ft_strchr(*save);
 	(*save)[save_len] = '\0';
 	*line = ft_strdup(*save);
-	//saveの改行後を更新
 	tmp = ft_strdup(*save + save_len + 1);
 	free(*save);
 	*save = tmp;
@@ -109,10 +105,8 @@ int	split_all(char **save, char **line)
 	save_len = -1;
 	if (*save)
 		save_len = ft_strchr(*save);
-	//saveに改行があるとき
 	if (save_len >= 0)
 		return (split_save(save, line));
-	//saveに改行がない時
 	else if (*save)
 	{
 		*line = *save;
@@ -125,17 +119,13 @@ int	split_all(char **save, char **line)
 
 int	get_next_line(int fd, char **line)
 {
-	int			flag;
-	static char	*save[0];
+	static char	*save[256];
 	char		*buf;
 	ssize_t		rd_cnt;
 
-	//最初のrd_cntの初期化
 	rd_cnt = 0;
-	//例外処理
 	if (fd < 0 || !line || BUFFER_SIZE <= 0)
 		return (-1);
-	//read
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	while (rd_cnt >= 0)
 	{
@@ -143,48 +133,45 @@ int	get_next_line(int fd, char **line)
 		if (rd_cnt == 0)
 			break ;
 		buf[rd_cnt] = '\0';
-		//save+buf strjoin内でsaveはfree
 		save[fd] = ft_strjoin(save[fd], buf);
-		//saveに改行があったら
 		if (ft_strchr(save[fd]) >= 0)
 		{
 			free(buf);
-			//saveの改行までをlineにいれる
-			flag = split_save(&save[fd], line);
-			return (flag);
+			return (split_save(&save[fd], line));
 		}
 	}
+	free(buf);
 	if (rd_cnt < 0)
 		return (-1);
-	//readし切った時
-	free(buf);
-	flag = split_all(&save[fd], line);
-	return (flag);
+	return (split_all(&save[fd], line));
 }
-/*
-#include <sys/types.h>
-#include <stdio.h>
-int    main(void)
-{
-    int        d = 1;
-    char    *line;
-    int        fd;
-    int        i = 1;
-    fd = open("test.txt", O_RDONLY);
-    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
-    while (d == 1)
-    {
-        printf("---%dline---\n", i);
-        d = get_next_line(fd, &line);
-        printf("%s\t", line);
-        free(line);
-        printf("d : %d\n", d);
-        i++;
-    }
-	//d = get_next_line(fd, &line);
-	//printf("%s\t", line);
-	//printf("d : %d\n", d);
-    close(fd);
-    system("leaks a.out");
-    return (0);
-}*/
+
+//#include <sys/types.h>
+//#include <stdio.h>
+//int    main(void)
+//{
+//    int        d = 1;
+//    char    *line;
+//    int        fd;
+//    int        i = 1;
+
+//	line = NULL;
+//    fd = open("te.txt", O_RDONLY);
+//    printf("BUFFER_SIZE: %d\n", BUFFER_SIZE);
+//    while (d == 1)
+//    {
+//		fd = 100;
+//        printf("---%dline---\n", i);
+//        d = get_next_line(fd, &line);
+//        printf("%s\t", line);
+//		free(line);
+//        printf("d : %d\n", d);
+//        i++;
+//    }
+//	//d = get_next_line(fd, &line);
+//	//printf("%s\t", line);
+//	//printf("d : %d\n", d);
+//    close(fd);
+//    system("leaks a.out");
+//    return (0);
+//}
