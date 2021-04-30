@@ -1,5 +1,5 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 100
+//#define BUFFER_SIZE 1000000000
 
 size_t	ft_strlen(const char *str)
 {
@@ -98,7 +98,9 @@ int	split_all(char **save, char **line)
 {
 	int		save_len;
 
-	save_len = ft_strchr(*save);
+	save_len = -1;
+	if (*save)
+		save_len = ft_strchr(*save);
 	//saveに改行があるとき
 	if (save_len >= 0)
 		return (split_save(save, line));
